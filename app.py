@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import os
+import cv2
+from flask import Response
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///objects.db'
@@ -43,4 +45,27 @@ def delete_object(id):
     db.session.delete(obj)
     db.session.commit()
     return redirect(url_for('index'))
+
+def gen_camera_stream(rtsp_url, username, psw):
+    address = f'rtsp://{username}:{psw}@{rtsp_url}'
+    cap = cv2.VideoCapture(address)
+    if not cap.isOpened():
+        raise RuntimeError(f"Cannot connect to {rtsp_url}")
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    cap.release()
+
+@app.route('/preview/<int:id>')
+def preview(id):
+    obj = Object.query.get_or_404(id)
+    if not obj.url:
+        return "No URL configured", 404
+    return Response(gen_camera_stream(obj.url, obj.username, obj.psw),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 

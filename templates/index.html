@@ -54,6 +54,11 @@
                     <form action="/delete/{{ obj.id }}" method="post" style="display:inline;">
                         <button class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">Delete</button>
                     </form>
+                    {% if obj.url %}
+                        <a class="btn btn-info btn-sm ms-2" target="_blank" href="/preview/{{ obj.id }}">Preview</a>
+                    {% else %}
+                        <button class="btn btn-secondary btn-sm ms-2" disabled>Preview</button>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
