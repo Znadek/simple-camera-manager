@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 import os
 import cv2
 from flask import Response
+import uuid
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = uuid.uuid4().hex
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///objects.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -45,6 +47,20 @@ def delete_object(id):
     db.session.delete(obj)
     db.session.commit()
     return redirect(url_for('index'))
+
+@app.route('/modify/<int:id>', methods=['GET', 'POST'])
+def modify_object(id):
+    obj = Object.query.get_or_404(id)
+    if request.method == 'POST':
+        obj.name = request.form['name']
+        obj.description = request.form['description']
+        obj.url = request.form['url']
+        obj.username = request.form['username']
+        obj.psw = request.form['psw']
+        db.session.commit()
+        flash('Object updated successfully!', 'success')
+        return redirect(url_for('index'))
+    return render_template('modify.html', obj=obj)
 
 def gen_camera_stream(rtsp_url, username, psw):
     address = f'rtsp://{username}:{psw}@{rtsp_url}'
