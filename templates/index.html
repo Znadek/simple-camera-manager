@@ -32,24 +32,22 @@
     <table class="table table-striped">
         <thead>
             <tr>
+                <th>Preview</th>
                 <th>ID</th>
                 <th>Name</th>
                 <th>Description</th>
-                <th>URL</th>
-                <th>Username</th>
-                <th>Password</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
         {% for obj in objects %}
             <tr>
+                <td>
+                    <iframe src="/preview/{{ obj.id }}" width="100%" height="100%"></iframe>
+                </td>
                 <td>{{ obj.id }}</td>
                 <td>{{ obj.name }}</td>
                 <td>{{ obj.description }}</td>
-                <td>{{ obj.url }}</td>
-                <td>{{ obj.username }}</td>
-                <td>{{ obj.psw }}</td>
                 <td>
                     <form action="/delete/{{ obj.id }}" method="post" style="display:inline-block;">
                         <button class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">Delete</button>
