@@ -30,36 +30,41 @@
         </div>
     </form>
     <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Preview</th>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+
         <tbody>
+          <div class="container">
+            
         {% for obj in objects %}
             <tr>
                 <td>
-                    <iframe src="/preview/{{ obj.id }}" width="100%" height="100%"></iframe>
+                    
                 </td>
-                <td>{{ obj.id }}</td>
-                <td>{{ obj.name }}</td>
-                <td>{{ obj.description }}</td>
+
                 <td>
+
+                </td>
+            </tr>
+            
+              <div class="row">
+                <div class="col">
+                  <iframe src="/preview-small/{{ obj.id }}" width="320px" height="180px"></iframe>
+                </div>
+                <div class="col">
+                  <label>{{ obj.name }}</label>
+                  <label>{{ obj.description }}</label>
+                </div>
+                <div class="col">
                     <form action="/delete/{{ obj.id }}" method="post" style="display:inline-block;">
-                        <button class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">Delete</button>
+                      <button class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">Delete</button>
                     </form>
                     {% if obj.url %}
                         <a class="btn btn-info btn-sm ms-2" target="_blank" href="/preview/{{ obj.id }}">Preview</a>
                     {% else %}
                         <button class="btn btn-secondary btn-sm ms-2" disabled>Preview</button>
                     {% endif %}
-                    <a href="/modify/{{ obj.id }}" class="btn btn-warning btn-sm ms-2">Modify</a>
-                </td>
-            </tr>
+                    <a href="/modify/{{ obj.id }}" class="btn btn-warning btn-sm ms-2">Modifica</a>
+                </div>
+              </div>
 
             <!-- Edit Modal -->
             <div class="modal fade" id="editModal{{ obj.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ obj.id }}" aria-hidden="true">
@@ -101,6 +106,7 @@
               </div>
             </div>
         {% endfor %}
+      </div>
         </tbody>
     </table>
 </div>

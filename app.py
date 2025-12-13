@@ -5,6 +5,8 @@ import cv2
 from flask import Response
 import uuid
 
+from sqlalchemy import null
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = uuid.uuid4().hex
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///objects.db'
@@ -62,7 +64,7 @@ def modify_object(id):
         return redirect(url_for('index'))
     return render_template('modify.html', obj=obj)
 
-def gen_camera_stream(rtsp_url, username, psw):
+def gen_camera_stream(rtsp_url, username, psw, small=False):
     address = f'rtsp://{username}:{psw}@{rtsp_url}'
     cap = cv2.VideoCapture(address)
     if not cap.isOpened():
@@ -71,6 +73,8 @@ def gen_camera_stream(rtsp_url, username, psw):
         success, frame = cap.read()
         if not success:
             break
+        if small:
+            frame = cv2.resize(frame, (320, 180))
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
@@ -85,3 +89,10 @@ def preview(id):
     return Response(gen_camera_stream(obj.url, obj.username, obj.psw),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/preview-small/<int:id>')
+def preview_small(id):
+    obj = Object.query.get_or_404(id)
+    if not obj.url:
+        return "No URL configured", 404
+    return Response(gen_camera_stream(obj.url, obj.username, obj.psw, small=True),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
